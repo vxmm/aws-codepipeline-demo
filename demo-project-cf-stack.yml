@@ -1,0 +1,367 @@
+---
+Metadata:
+  AWSToolsMetrics:
+    IaC_Generator: "arn:aws:cloudformation:us-east-1:975050137696:generatedTemplate/98756c2a-eb98-4f5a-9e8b-e4ca7158f999"
+Resources:
+  Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: vpc-0c3b8f2c4932b773d
+      CidrBlock: 172.31.0.0/20
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: "Subnet1"
+
+  # Subnet 2
+  Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: vpc-0c3b8f2c4932b773d
+      CidrBlock: 172.31.16.0/20
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: "Subnet2"
+
+  # Security Group 1
+  SecurityGroup1:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow web traffic for Instance 1"
+      VpcId: vpc-0c3b8f2c4932b773d
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  # Security Group 2
+  SecurityGroup2:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow web traffic for Instance 2"
+      VpcId: vpc-0c3b8f2c4932b773d
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  # EC2 Instance 1
+  EC2Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: ec2-codepipeline-keys
+      SubnetId: !Ref Subnet1
+      SecurityGroupIds:
+        - !Ref SecurityGroup1
+      ImageId: ami-0ca9fb66e076a6e32
+      Tags:
+        - Key: Name
+          Value: "Web Server"
+
+  # EC2 Instance 2
+  EC2Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: ec2-codepipeline-keys
+      SubnetId: !Ref Subnet2
+      SecurityGroupIds:
+        - !Ref SecurityGroup2
+      ImageId: ami-0ca9fb66e076a6e32
+      Tags:
+        - Key: Name
+          Value: "IDE"
+
+  CodeArtifactDomain00domaintestproject0003l9t:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::CodeArtifact::Domain"
+    DeletionPolicy: "Delete"
+    Properties:
+      DomainName: "testproject"
+
+  IAMManagedPolicy00policyserviceroleCodeBuildCloudWatchLogsPolicydemowebbuilduseast1004E1t4:
+    DependsOn: "IAMRole00codebuilddemowebbuildservicerole00nDVn8"
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::ManagedPolicy"
+    DeletionPolicy: "Delete"
+    Properties:
+      ManagedPolicyName: "CodeBuildCloudWatchLogsPolicy-demo-web-build-us-east-1"
+      Path: "/service-role/"
+      Description: "Policy used in trust relationship with CodeBuild"
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - "arn:aws:logs:us-east-1:975050137696:log-group:demo-build-logs"
+          - "arn:aws:logs:us-east-1:975050137696:log-group:demo-build-logs:*"
+          Action:
+          - "logs:CreateLogGroup"
+          - "logs:CreateLogStream"
+          - "logs:PutLogEvents"
+          Effect: "Allow"
+      Roles:
+      - "codebuild-demo-web-build-service-role"
+      Users: []
+
+  IAMManagedPolicy00policyserviceroleCodeBuildBasePolicydemowebbuilduseast100ha6ES:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::ManagedPolicy" 
+    DeletionPolicy: "Delete"
+    DependsOn: "IAMRole00codebuilddemowebbuildservicerole00nDVn8"
+    Properties:
+      ManagedPolicyName: "CodeBuildBasePolicy-demo-web-build-us-east-1"
+      Path: "/service-role/"
+      Description: "Policy used in trust relationship with CodeBuild"
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - "arn:aws:logs:us-east-1:975050137696:log-group:/aws/codebuild/demo-web-build"
+          - "arn:aws:logs:us-east-1:975050137696:log-group:/aws/codebuild/demo-web-build:*"
+          Action:
+          - "logs:CreateLogGroup"
+          - "logs:CreateLogStream"
+          - "logs:PutLogEvents"
+          Effect: "Allow"
+        - Resource:
+          - "arn:aws:s3:::codepipeline-us-east-1-*"
+          Action:
+          - "s3:PutObject"
+          - "s3:GetObject"
+          - "s3:GetObjectVersion"
+          - "s3:GetBucketAcl"
+          - "s3:GetBucketLocation"
+          Effect: "Allow"
+        - Resource:
+          - "arn:aws:s3:::build-artifacts-demo-vxmm"
+          - "arn:aws:s3:::build-artifacts-demo-vxmm/*"
+          Action:
+          - "s3:PutObject"
+          - "s3:GetBucketAcl"
+          - "s3:GetBucketLocation"
+          Effect: "Allow"
+        - Resource:
+          - "arn:aws:codebuild:us-east-1:975050137696:report-group/demo-web-build-*"
+          Action:
+          - "codebuild:CreateReportGroup"
+          - "codebuild:CreateReport"
+          - "codebuild:UpdateReport"
+          - "codebuild:BatchPutTestCases"
+          - "codebuild:BatchPutCodeCoverages"
+          Effect: "Allow"
+      Roles:
+      - "codebuild-demo-web-build-service-role"
+      Users: []
+
+  CodeArtifactRepository00repositorytestprojectmavencentralstore00OFojN:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::CodeArtifact::Repository"
+    DeletionPolicy: "Delete"
+    Properties:
+      RepositoryName: "maven-central-store"
+      Description: "Provides Maven artifacts from Maven Central Repository."
+      ExternalConnections:
+      - "public:maven-central"
+      DomainName:
+        Fn::GetAtt:
+        - "CodeArtifactDomain00domaintestproject0003l9t"
+        - "Name"
+
+  IAMManagedPolicy00policyserviceroleCodeBuildCodeConnectionsSourceCredentialsPolicydemowebbuilduseast100Z2On9:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::ManagedPolicy"
+    DeletionPolicy: "Delete"
+    DependsOn: "IAMRole00codebuilddemowebbuildservicerole00nDVn8"
+    Properties:
+      ManagedPolicyName: "CodeBuildCodeConnectionsSourceCredentialsPolicy-demo-web-build-us-east-1"
+      Path: "/service-role/"
+      Description: "Policy used in trust relationship with CodeBuild"
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource:
+          - "arn:aws:codestar-connections:us-east-1:975050137696:connection/f7837c55-9a51-4293-9fd3-ce1a2d39f0bb"
+          - "arn:aws:codeconnections:us-east-1:975050137696:connection/f7837c55-9a51-4293-9fd3-ce1a2d39f0bb"
+          Action:
+          - "codestar-connections:GetConnectionToken"
+          - "codestar-connections:GetConnection"
+          - "codeconnections:GetConnectionToken"
+          - "codeconnections:GetConnection"
+          - "codeconnections:UseConnection"
+          Effect: "Allow"
+      Roles:
+      - "codebuild-demo-web-build-service-role"
+      Users: []
+
+  CodeArtifactRepository00repositorytestprojectmavenwebapp00pwu8q:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::CodeArtifact::Repository"
+    DeletionPolicy: "Delete"
+    Properties:
+      Upstreams:
+      - Fn::GetAtt:
+        - "CodeArtifactRepository00repositorytestprojectmavencentralstore00OFojN"
+        - "Name"
+      RepositoryName: "maven-web-app"
+      Description: "Packages for the web app"
+      DomainName:
+        Fn::GetAtt:
+        - "CodeArtifactDomain00domaintestproject0003l9t"
+        - "Name"
+
+  IAMRole00ec2webserverfrontendcodedeployaccess00Hbxd6:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: IAMRole00ec2webserverfrontendcodedeployaccess00Hbxd6
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeDeployAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+
+  IAMInstanceProfile00ec2webserverfrontendcodedeployaccess00L6gxx:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::InstanceProfile"
+    DeletionPolicy: "Delete"
+    DependsOn: "IAMRole00ec2webserverfrontendcodedeployaccess00Hbxd6"
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: "IAMRole00ec2webserverfrontendcodedeployaccess00Hbxd6"
+      InstanceProfileName:
+        Ref: "IAMRole00ec2webserverfrontendcodedeployaccess00Hbxd6"
+
+  CodeDeployApplication00demowebdeploy00ml8xX:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::CodeDeploy::Application"
+    DeletionPolicy: "Delete"
+    Properties:
+      ApplicationName: "demo-web-deploy"
+      ComputePlatform: "Server"
+  
+  S3Bucket00buildartifactsdemovxmm00CFr3X:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::S3::Bucket"
+    DeletionPolicy: "Delete"
+    Properties:
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        BlockPublicAcls: true
+      BucketName: "build-artifacts-demo-vxmm"
+      OwnershipControls:
+        Rules:
+        - ObjectOwnership: "BucketOwnerEnforced"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: true
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: "AES256"
+
+  IAMRole00codebuilddemowebbuildservicerole00nDVn8:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::Role"
+    DeletionPolicy: "Delete"
+    Properties:
+      Path: "/service-role/"
+      MaxSessionDuration: 3600
+      RoleName: "codebuild-demo-web-build-service-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Action: "sts:AssumeRole"
+          Effect: "Allow"
+          Principal:
+            Service: "codebuild.amazonaws.com"
+
+  IAMManagedPolicy00policycodeartifactConsumerPolicy00kyyoy:
+    UpdateReplacePolicy: "Delete"
+    Type: "AWS::IAM::ManagedPolicy"
+    DeletionPolicy: "Delete"
+    DependsOn: "IAMRole00codebuilddemowebbuildservicerole00nDVn8"
+    Properties:
+      ManagedPolicyName: "codeartifactConsumerPolicy"
+      Path: "/"
+      Description: "Provides permissions to read from CodeArtifact."
+      Groups: []
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Resource: "*"
+          Action:
+          - "codeartifact:GetAuthorizationToken"
+          - "codeartifact:GetRepositoryEndpoint"
+          - "codeartifact:ReadFromRepository"
+          Effect: "Allow"
+        - Condition:
+            StringEquals:
+              sts:AWSServiceName: "codeartifact.amazonaws.com"
+          Resource: "*"
+          Action: "sts:GetServiceBearerToken"
+          Effect: "Allow"
+      Roles:
+      - "codebuild-demo-web-build-service-role"
+      Users: []
+
+  # CodeBuild Project
+  CodeBuildProject:
+    DependsOn:
+      - "IAMRole00codebuilddemowebbuildservicerole00nDVn8"
+      - "S3Bucket00buildartifactsdemovxmm00CFr3X"
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: nextwork-web-build
+      Description: Build project for NextWork web application
+      Source:
+        Type: GITHUB
+        Location: "https://github.com/vxmm/aws-codepipeline-demo"
+        BuildSpec: buildspec.yml
+      Artifacts:
+        Type: S3
+        Name: build-artifacts-demo-vxmm.zip
+        Packaging: ZIP
+        Location: "build-artifacts-demo-vxmm"
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:corretto8
+      ServiceRole: !GetAtt IAMRole00codebuilddemowebbuildservicerole00nDVn8.Arn
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: demo-build-logs
+          Status: ENABLED
+          StreamName: webappGetting
