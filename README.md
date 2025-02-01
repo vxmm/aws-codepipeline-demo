@@ -1,4 +1,4 @@
-Neat little project I did to get a bit of insight on all of the Code* AWS services based on Nextwork's series [here](learn.nextwork.org/projects/aws-devops-cloudformation?o-hbg=true\) in preparation for my AWS DevOps certification. 
+Neat little project I did to get a bit of insight on all of the Code* AWS services based on Nextwork's series [here](https://learn.nextwork.org/projects/aws-devops-cloudformation?o-hbg=true\.com)
 
 My humble controbution was with rewriting the CF stack as to include an IDE running on an EC2 instance instead of Cloud9 as well as debug/resolve dependency issues that arise during creation, in part due to pre-existing security groups and roles in my account. 
 
